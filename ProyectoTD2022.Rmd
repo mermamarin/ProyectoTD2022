@@ -1,6 +1,6 @@
 ---
 title: "Contaminación Acústica en el Barrio de Ruzafa"
-subtitle: Proyecto Tratamiento de Datos
+subtitle: Proyecto Tratamiento de Datos 2022
 author: "María Mañas Marín"
 date:  "`r Sys.Date()`"
 
@@ -154,12 +154,12 @@ Abrimos los archivos y los cargamos
 Cadiz_3 <- read_csv("data/Cadiz_3.csv")
 Cadiz_16 <- read_csv("data/Cadiz_16.csv")
 Carles_Cervera_34 <- read_csv("data/Carles_Cervera_34.csv")
-Carles_Cervera_Chaflan_Reina_Donya_Maria <- read_csv("data/Carles_Cervera_Chaflan_Reina_Donya_Maria.csv")
+Carles_Cervera_Chaflan_Donya_Maria <- read_csv("data/Carles_Cervera_Chaflan_Reina_Donya_Maria.csv")
 Cuba_3 <- read_csv("data/Cuba_3.csv")
 Doctor_Serrano_21 <- read_csv("data/Doctor_Serrano_21.csv")
 General_Prim_Chaflan_Donoso_Cortes <- read_csv("data/General_Prim_Chaflan_Donoso_Cortes.csv")
 Puerto_Rico_21 <- read_csv("data/Puerto_Rico_21.csv")
-Salvador_Abril_Chaflan_Maestro_Jose_Serrano <- read_csv("data/Salvador_Abril_Chaflan_Maestro_Jose_Serrano.csv")
+Salvador_Abril_Chaflan_Jose_Serrano <- read_csv("data/Salvador_Abril_Chaflan_Maestro_Jose_Serrano.csv")
 Sueca_2 <- read_csv("data/Sueca_2.csv")
 Sueca_32 <- read_csv("data/Sueca_32.csv")
 Sueca_61 <- read_csv("data/Sueca_61.csv")
@@ -168,5 +168,100 @@ Vivons_Chaflan_Cadiz <- read_csv("data/Vivons_Chaflan_Cadiz.csv")
 
 ```
 
+# Preparacion de los datos
+
+Todos los archivos leídos los pasamos a un formato tidy habiéndolos ordenado todos de la misma manera para posteriormente juntarlos todos en un mismo data frame y poder trabajar cómodamente con él.
+
+Comenzamos creando una columna a cada data frame distinto que se guardará en la variable lugar, de manera que cuando las juntemos, la variable 'Place' tendrá la información de todas las tablas
+
+
+```{r, echo = TRUE, message = FALSE, warning = FALSE, tidy = FALSE}
+
+Cadiz_3$Place = "Cadiz 3"
+Cadiz_16$Place = "Cadiz 16"
+Carles_Cervera_34$Place = "Carles Cervera 34"
+Carles_Cervera_Chaflan_Donya_Maria$Place = "Carles Cervera Chaflan"
+Cuba_3$Place = "Cuba 3"
+Doctor_Serrano_21$Place = "Doctor Serrano"
+General_Prim_Chaflan_Donoso_Cortes$Place = "General Prim"
+Puerto_Rico_21$Place = "Puerto Rico 21"
+Salvador_Abril_Chaflan_Jose_Serrano$Place = "Salvador Abril"
+Sueca_2$Place = "Sueca 2"
+Sueca_32$Place = "Sueca 32"
+Sueca_61$Place = "Sueca 61"
+Sueca_Esq_Denia$Place = "Sueca esq Denia"
+Vivons_Chaflan_Cadiz$Place = "Vivons Chaflan"
+
+```
+
+Forzamos que los diferentes ficheros esten en un formato tidy
+
+```{r, echo = TRUE, message = FALSE, warning = FALSE, tidy = FALSE}
+Cadiz_3 = Cadiz_3[c(1,12,2:11)]
+Cadiz_3t = Cadiz_3 %>% gather(Ruido, Valor,8:length(Cadiz_3)-1)
+
+Cadiz_16 = Cadiz_16[c(1,12,2:11)]
+Cadiz_16t = Cadiz_16 %>% gather(Ruido, Valor,8:length(Cadiz_16)-1)
+
+Carles_Cervera_34 = Carles_Cervera_34[c(1,12,2:11)]
+Carles_Cervera_34t = Carles_Cervera_34 %>% gather(Ruido, Valor,
+                                                  8:length(Carles_Cervera_34)-1)
+
+Carles_Cervera_Chaflan_Donya_Maria = 
+  Carles_Cervera_Chaflan_Donya_Maria[c(1,12,2:11)]
+Carles_Cervera_Chaflan_Donya_Mariat = Carles_Cervera_Chaflan_Donya_Maria %>% 
+  gather(Ruido, Valor,8:length(Carles_Cervera_Chaflan_Donya_Maria)-1)
+
+Cuba_3 = Cuba_3[c(1,12,2:11)]
+Cuba_3t = Cuba_3 %>% gather(Ruido, Valor,8:length(Cuba_3)-1)
+
+Doctor_Serrano_21 = Doctor_Serrano_21[c(1,12,2:11)]
+Doctor_Serrano_21t = Doctor_Serrano_21 %>% gather(Ruido, Valor,
+                                                8:length(Doctor_Serrano_21)-1)
+
+General_Prim_Chaflan_Donoso_Cortes = General_Prim_Chaflan_Donoso_Cortes[c(1,12,2:11)]
+General_Prim_Chaflan_Donoso_Cortest = General_Prim_Chaflan_Donoso_Cortes %>% 
+  gather(Ruido, Valor,8:length(General_Prim_Chaflan_Donoso_Cortes)-1)
+
+Puerto_Rico_21 = Puerto_Rico_21[c(1,12,2:11)]
+Puerto_Rico_21t = Puerto_Rico_21 %>% gather(Ruido, Valor,8:length(Puerto_Rico_21)-1)
+
+Salvador_Abril_Chaflan_Jose_Serrano = 
+  Salvador_Abril_Chaflan_Jose_Serrano[c(1,12,2:11)]
+Salvador_Abril_Chaflan_Jose_Serranot = 
+  Salvador_Abril_Chaflan_Jose_Serrano %>% 
+  gather(Ruido, Valor,8:length(Salvador_Abril_Chaflan_Jose_Serrano)-1)
+
+Sueca_2 = Sueca_2[c(1,12,2:11)]
+Sueca_2t = Sueca_2 %>% gather(Ruido, Valor,8:length(Sueca_2)-1)
+
+Sueca_32 = Sueca_32[c(1,12,2:11)]
+Sueca_32t = Sueca_32 %>% gather(Ruido, Valor,8:length(Sueca_32)-1)
+
+Sueca_61 = Sueca_61[c(1,12,2:11)]
+Sueca_61t = Sueca_61 %>% gather(Ruido, Valor,8:length(Sueca_61)-1)
+
+Sueca_Esq_Denia = Sueca_Esq_Denia[c(1,12,2:11)]
+Sueca_Esq_Deniat = Sueca_Esq_Denia %>% gather(Ruido, 
+                              Valor,8:length(Sueca_Esq_Denia)-1)
+
+Vivons_Chaflan_Cadiz = Vivons_Chaflan_Cadiz[c(1,12,2:11)]
+Vivons_Chaflan_Cadizt = 
+  Vivons_Chaflan_Cadiz %>% gather(Ruido, Valor,8:length(Vivons_Chaflan_Cadiz)-1)
+```
+
+Fusionamos todos los dataframes para trabajar cómodamente con los datos.
+
+```{r, echo = TRUE, message = FALSE, warning = FALSE, tidy = FALSE}
+df <- rbind(Cadiz_3t, Cadiz_16t, Carles_Cervera_34t, 
+            Carles_Cervera_Chaflan_Donya_Mariat, 
+            Cuba_3t, Doctor_Serrano_21t, 
+            General_Prim_Chaflan_Donoso_Cortest,
+            Puerto_Rico_21t,Salvador_Abril_Chaflan_Jose_Serranot, 
+            Sueca_2t, Sueca_32t, Sueca_61t, Sueca_Esq_Deniat, 
+            Vivons_Chaflan_Cadizt)
+
+head(df,5)
+```
 
 
