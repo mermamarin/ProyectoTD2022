@@ -263,5 +263,16 @@ df <- rbind(Cadiz_3t, Cadiz_16t, Carles_Cervera_34t,
 
 head(df,5)
 ```
+# Analisis Exploratorio
+
+Realizamos un Analisis Exploratorio para echar un primer vistazo a nuestros datos y a partir de ahi, limpiar, transformar y modelar datos con el objetivo de extraer información, sugerir conclusiones y servir a otras etapas posteriores.
+
+```{r, echo = TRUE, message = FALSE, warning = FALSE, tidy = FALSE}
+glimpse(df)
+```
+```{r, echo = TRUE, message = FALSE, warning = FALSE, tidy = FALSE}
+summary(df)
+```
+A simple vista observamos que hay columnas que no nos proporcionan información. Además, encontramos valores infinitos en la columna que indica el valor del nivel de ruido. En cuanto a la columna id, observamos que no es adecuada, tanto por los valores que va tomando, teniendo en cuenta que el número máximo debería corresponderse con el número máximo de registro, así como el tipo de dato en el que se encuentran.   
 
 
