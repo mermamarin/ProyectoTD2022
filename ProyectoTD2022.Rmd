@@ -321,6 +321,25 @@ Visualizamos de qué manera ha quedado nuestro conjunto de datos tras el tratami
 head(df_tidy, 5)
 ```
 
+# Detección y corrección de outliers
+
+Realizamos un analisis de los valores perdidos, infinitos o inusuales de nuestro conjunto de datos
+
+```{r, echo = TRUE, message = FALSE, warning = FALSE, tidy = FALSE}
+# Comprobamos en qué posiciones encontramos valores 'Inf' - Infinitos y 
+# los imputamos por la media de los valores posibles de 'Nivel_Sonoro'
+# sin tener en cuenta las posiciones en las que encontramos inf
+which(df_tidy$Nivel_Sonoro == Inf)
+pos <- which(df_tidy$Nivel_Sonoro == Inf)
+df_tidy$Nivel_Sonoro[pos] <- mean(df_tidy$Nivel_Sonoro[-pos])
+
+# Comprobamos en qué posiciones encontramos valores 'NA' y obtenemos un total de 0
+which(df_tidy$Nivel_Sonoro == NA)
+# Visualizamos lo esperado
+aggr(df_tidy, prop = FALSE, combined = TRUE, numbers = TRUE, sortVars = TRUE, sortCombs = TRUE)
+
+```
+
 
 
 
