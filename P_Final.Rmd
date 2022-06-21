@@ -1,0 +1,113 @@
+---
+title: "Contaminación Acústica en el Barrio de Ruzafa"
+subtitle: Proyecto Tratamiento de Datos
+author: "María Mañas Marín"
+date:  "`r Sys.Date()`"
+
+params:
+  lang: ES
+lang: "`r switch(params$lang, ES = 'es-ES', EN = 'en-US')`"
+
+output:
+
+  pdf_document:
+    toc: yes
+    toc_depth: 3
+
+  html_document:
+    echo: yes
+    number_sections: yes
+    theme: lumen 
+    toc: yes
+
+  html_notebook:
+    echo: yes
+    number_sections: yes
+    toc: yes
+
+language:
+  label:
+    fig: 'Figura '
+    tab: 'Tabla '
+    eq: 'Ecuación '
+    thm: 'Teorema '
+    lem: 'Lema '
+    def: 'Definición '
+    cor: 'Corolario '
+    prp: 'Proposición '
+    exm: 'Ejemplo '
+    exr: 'Ejercicio '
+    proof: 'Demostración. '
+    remark: 'Nota: '
+    solution: 'Solución. '
+---
+
+# Configuración del los bloques (*Chunks*)
+
+Cada bloque tiene muchos parámetros que pueden ser configurados
+
+**include** = **FALSE** evita que el código y los resultados aparezcan en el archivo terminado. R Markdown aún ejecuta el código en el fragmento y los resultados pueden ser utilizados por otros fragmentos.
+
+**echo = FALSE** evita que el código, pero no los resultados, aparezcan en el archivo terminado. Esta es una manera útil de incrustar figuras.
+
+**message = FALSE** evita que los mensajes generados por el código aparezcan en el archivo finalizado.
+
+**warning = FALSE** evita que las advertencias generadas por el código aparezcan en el final.
+
+**fig.cap = "..."** agrega un título a los resultados gráficos.
+
+Se pueden especificicar opciones generales por defecto en *opts_chunk\$set*
+
+Más opciones en el enlace [\<https://bookdown.org/yihui/rmarkdown/\>](https://bookdown.org/yihui/rmarkdown/){.uri}
+
+```{r setup, cache = F, echo = F, message = F, warning = F, tidy = F}
+
+
+# CONFIGURACIÓN GENERAL
+library(knitr)
+options(width = 100)
+
+# Opciones generales de los chucks. Se utilizarán salvo cambios en el chunk
+opts_chunk$set(echo=F, message = F, error = F, warning = F, comment = NA, fig.align = 'center', dpi = 200, tidy = F, cache.path = '.cache/', fig.path = './figura/')
+
+# Opciones generales de dígitos cuando se incluyen tablas
+#options(xtable.type = 'html')
+knit_hooks$set(inline = function(x) {
+  
+  if(is.numeric(x)) {
+    round(x, getOption('digits'))
+  } else {
+    paste(as.character(x), collapse = ', ')
+  }
+})
+#knit_hooks$set(plot = knitr:::hook_plot_html)
+```
+
+# Instalación automática de paquetes
+
+Especificar las librerías necesarias para ejecutar el código en la variable ***packages***. Si no está instaladas, se instalarán y cargarán (solo para aquellas que están en el repositorio <http://cran.rediris.es>)
+
+El siguiente bloque, al no especificar opciones del *chunk* usa la configuración por defecto.
+
+```{r}
+
+# Especificamos las librerías necesarias en esta lista
+
+packages = c("tidyverse","knitr", 'dplyr', 'tidyr', 'VIM', 'patchwork')
+
+#use this function to check if each package is on the local machine
+#if a package is installed, it will be loaded
+#if any are not, the missing package(s) will be installed and loaded
+package.check <- lapply(packages, FUN = function(x) {
+  if (!require(x, character.only = TRUE)) {
+    install.packages(x, dependencies = TRUE,repos='http://cran.rediris.es')
+  }
+  library(x, character.only = TRUE)
+})
+
+#verify they are loaded
+search()
+
+```
+
+
