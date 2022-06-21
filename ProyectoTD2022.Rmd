@@ -334,7 +334,7 @@ pos <- which(df_tidy$Nivel_Sonoro == Inf)
 df_tidy$Nivel_Sonoro[pos] <- mean(df_tidy$Nivel_Sonoro[-pos])
 
 # Comprobamos en qué posiciones encontramos valores 'NA' y obtenemos un total de 0
-which(df_tidy$Nivel_Sonoro == NA)
+is.na(df_tidy$Nivel_Sonoro) %>% sum()
 # Visualizamos lo esperado
 aggr(df_tidy, prop = FALSE, combined = TRUE, numbers = TRUE, sortVars = TRUE, sortCombs = TRUE)
 
