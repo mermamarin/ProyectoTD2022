@@ -114,6 +114,59 @@ search()
 
 Se usan rutas especificas a la carpeta data, que es la carpeta donde se encuentra la informacion del proyecto en 14 ficheros diferentes en relación a la contaminación acústica del barrio de Ruzafa, para su posterior análisis y tratamiento.
 
+# Información
+
+**‘data/Sueca_Esq_Denia.csv’** : Datos diarios del sensor de ruido ubicado en el barrio de Ruzafa, en la calle Sueca Esq. Denia
+
+**‘data/Cadiz_16.csv’** : Datos diarios del sensor de ruido ubicado en el barrio de Ruzafa, en la calle Cádiz, 16
+
+**‘data/Cadiz_3.csv’** : Datos diarios del sensor de ruido ubicado en el barrio de Ruzafa, en la calle Cádiz, 3
+
+**‘data/Cuba_3.csv’** : Datos diarios del sensor de ruido ubicado en el barrio de Ruzafa, en la calle Cuba, 3
+
+**‘data/Sueca_2.csv’** : Datos diarios del sensor de ruido ubicado en el barrio de Ruzafa, en la calle Sueca, 2
+
+**‘data/Sueca_61.csv’** : Datos diarios del sensor de ruido ubicado en el barrio de Ruzafa, en la calle Sueca, 61
+
+**‘data/Sueca_32.csv’** : Datos diarios del sensor de ruido ubicado en el barrio de Ruzafa, en la calle Sueca, 32
+
+**‘data/Carles_Cervera_Chaflan_Reina_Donya_Maria.csv’** : Datos diarios del sensor de ruido ubicado en el barrio de Ruzafa, en la calle Carles Cervera, Chaflán Reina Doña María
+
+**‘data/Salvador_Abril_Chaflan_Maestro_Jose_Serrano.csv’** : Datos diarios del sensor de ruido ubicado en el barrio de Ruzafa, en la calle Salvador Abril Chaflán Maestro José Serrano
+
+**‘data/Vivons_Chaflan_Cadiz.csv’** : Datos diarios del sensor de ruido ubicado en el barrio de Ruzafa, en la calle Vivons Chaflán Cádiz
+
+**‘data/Carles_Cervera_34.csv’** : Datos diarios del sensor de ruido ubicado en el barrio de Ruzafa, en la calle Carles Cervera, 34
+
+**‘data/Puerto_Rico_21.csv’** : Datos diarios del sensor de ruido ubicado en el barrio de Ruzafa, en la calle Puerto Rico, 21
+
+**‘data/Doctor_Serrano_21.csv’** : Datos diarios del sensor de ruido ubicado en el barrio de Ruzafa, en la calle Doctor Serrano, 21
+
+**‘data/General_Prim_Chaflan_Donoso_Cortes.csv’** : Datos diarios del sensor de ruido ubicado en el barrio de Ruzafa, en la calle General Prim Chaflán Donoso Cortés
+
+
+# Apertura de ficheros
+
+Abrimos los archivos y los cargamos
+
+```{r, echo = TRUE, message = FALSE, warning = FALSE, tidy = FALSE}
+
+Cadiz_3 <- read_csv("data/Cadiz_3.csv")
+Cadiz_16 <- read_csv("data/Cadiz_16.csv")
+Carles_Cervera_34 <- read_csv("data/Carles_Cervera_34.csv")
+Carles_Cervera_Chaflan_Reina_Donya_Maria <- read_csv("data/Carles_Cervera_Chaflan_Reina_Donya_Maria.csv")
+Cuba_3 <- read_csv("data/Cuba_3.csv")
+Doctor_Serrano_21 <- read_csv("data/Doctor_Serrano_21.csv")
+General_Prim_Chaflan_Donoso_Cortes <- read_csv("data/General_Prim_Chaflan_Donoso_Cortes.csv")
+Puerto_Rico_21 <- read_csv("data/Puerto_Rico_21.csv")
+Salvador_Abril_Chaflan_Maestro_Jose_Serrano <- read_csv("data/Salvador_Abril_Chaflan_Maestro_Jose_Serrano.csv")
+Sueca_2 <- read_csv("data/Sueca_2.csv")
+Sueca_32 <- read_csv("data/Sueca_32.csv")
+Sueca_61 <- read_csv("data/Sueca_61.csv")
+Sueca_Esq_Denia <- read_csv("data/Sueca_Esq_Denia.csv")
+Vivons_Chaflan_Cadiz <- read_csv("data/Vivons_Chaflan_Cadiz.csv")
+
+```
 
 
 
