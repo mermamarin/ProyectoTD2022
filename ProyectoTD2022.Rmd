@@ -275,4 +275,52 @@ summary(df)
 ```
 A simple vista observamos que hay columnas que no nos proporcionan información. Además, encontramos valores infinitos en la columna que indica el valor del nivel de ruido. En cuanto a la columna id, observamos que no es adecuada, tanto por los valores que va tomando, teniendo en cuenta que el número máximo debería corresponderse con el número máximo de registro, así como el tipo de dato en el que se encuentran.   
 
+# Acondicionamiento de los datos
+
+Realizamos las modificaciones necesarias para convertir nuestro df en un df TIDY; suponiendo la eliminación de algunas columnas no informativas y cambios en los nombres de las otras tantas que si que informan.
+
+```{r, echo = TRUE, message = FALSE, warning = FALSE, tidy = FALSE}
+# Comprobamos si hay información irrelevante
+df %>% filter(fiwareServicePath != '/sonometros')
+# Todos los valores son iguales
+df %>% filter(entityType != 'NoiseLevelObserved')
+# Todos los valores son iguales
+df$entityId %>% unique()
+# Encontramos un total de 14 valores distintos que indican el número distinto de 
+# id de estaciones en las que se ha medido el ruido, que corresponden con el total 
+# de las estaciones. Es por eso que podemos prescindir de esta variable: La variable 
+# 'Place' discrimina de la misma manera, proporcionándonos la misma información
+df$Ruido %>% unique()
+# Encontramos un total de 5 tipos de Ruidos medidos distintos, correspondiendo con 
+# los medidos durante el día, la tarde, la noche, un total de las anteriores y un 
+# indicador del nivel sonoro continuo
+
+# Las columnas _id, fiwareServicePath, recvTime, entityId y entityType no aportan 
+# información.
+df_tidy <- df %>% select(-1, -fiwareServicePath, -entityType, -recvTime, -entityId)
+
+# Guardamos cada variable con el tipo de dato que le corresponde
+df_tidy <- df_tidy %>% mutate(Place = as.factor(Place), 
+                              dateObserved = as.POSIXlt(dateObserved), 
+                              Ruido = as.factor(Ruido),
+                              Valor = as.numeric(Valor))
+
+# Modificamos el nombre de las variables
+names(df_tidy) = c("Estacion", "Fecha_Medidas", "Tipo_Ruido", "Nivel_Sonoro")
+```
+Después de todos estos cambios, tenemos com resultado un dataset con las siguientes variables:
+
+-**Estacion**, Lugar de medición\
+-**Fecha_Medidas**, Fecha a la que se refieren las medidas\
+-**Tipo_Ruido**, Tipo de ruido que se mide\
+-**Nivel_Sonoro**, Valor del ruido que se mide\
+
+Visualizamos de qué manera ha quedado nuestro conjunto de datos tras el tratamiento de sus filas y columnas
+
+```{r, echo = TRUE, message = FALSE, warning = FALSE, tidy = FALSE}
+head(df_tidy, 5)
+```
+
+
+
 
