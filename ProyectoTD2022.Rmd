@@ -340,6 +340,44 @@ aggr(df_tidy, prop = FALSE, combined = TRUE, numbers = TRUE, sortVars = TRUE, so
 
 ```
 
+# Análisis Univariante
+
+Realizamos un Análisis Univariante, encontrando los estadísticos básicos y unas representaciones de los datos de los que disponemos en referencia a la variable cuantitativa 'Nivel_Sonoro'.
+
+```{r, echo = TRUE, message = FALSE, warning = FALSE, tidy = FALSE}
+# Estadísticos que representaremos
+estadisticosbasicos = list("/min" = min, "/max" = max, "/mean" = mean, "/median" = median, "/var" = var, "/sd" = sd, "/IQR" = IQR)
+
+#Mostramos los estadísticos de la variable "Nivel_Sonoro"
+tabla <- summarise(df_tidy, across("Nivel_Sonoro", estadisticosbasicos, na.rm=TRUE)) %>% 
+  pivot_longer(names_to = "VariableEstadístico", values_to = "Valor", cols = c(1:7)) %>% 
+  separate(VariableEstadístico, c("Variable", "Stat"), "/") %>% 
+  pivot_wider(names_from = Stat, values_from = Valor)
+
+# Visualizamos la tabla
+tabla
+
+# Utilizamos la función kable que forma una tabla más profesional
+kable(tabla)
+```
+
+Realizaremos un Análisis Univariante más visual que implique una mayor percepción no solo de los estadísticos básicos sino de todo el conjunto del que disponemos.
+
+```{r, echo = TRUE, message = FALSE, warning = FALSE, tidy = FALSE}
+# Histograma de densidad
+ggplot(data=df_tidy, aes(x=Nivel_Sonoro)) + 
+  geom_histogram(aes(y = ..density..),
+                breaks=seq(30, 100, by=4), 
+                 col="red", 
+                 fill="green", 
+                 alpha = .2) +  
+  geom_density(col=2) + 
+  labs(title="Histograma del Nivel Sonoro", x="Nivel Sonoro", y="density")
+```
+
+Se observa que se forma una Campana de Gauss en la que los valores más repetidos son los encontrados en el centro del histograma, encontrando en los extremos inferior y superior los conocidos como valores más atípicos, menos repetidos. Además, comprobamos que los valores obtenidos en los estadísticos básicos se corresponden con los representados en el histogrma; donde el valor mínimo y máximo parecen estar entre los 40dB, así como el máximo llegando a los 100dB. Exactamente los estadísticos nos dicen que estos son 40,1dB y 97,4dB, respectivamente. En cuanto a la media y la mediana se puede apreciar en la representación que podría ser un valor cercano a 60 y precisamente los estadísticos de media y mediana obtienen un valor de 60,43dB y 60,6dB respectivamente.
+
+
 
 
 
