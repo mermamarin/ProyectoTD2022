@@ -481,6 +481,7 @@ ggplot(aux1, aes(x = Mes, y = Nivel_Sonoro)) +
   ggtitle("Nivel Sonoro en función de los Meses") +
   theme_minimal()
 ```
+
 ```{r, echo = TRUE, message = FALSE, warning = FALSE, tidy = FALSE}
 ggplot(aux1, aes(x = Mes, y = Nivel_Sonoro, colour = Nivel_Sonoro)) + 
   geom_jitter(size = 1, alpha = 0.7) +
@@ -627,12 +628,27 @@ ggplot(data = aux1, aes(x = Estacion_Anyo, y = Nivel_Sonoro)) +
   xlab('Estación del Año') + 
   ylab('Nivel Sonoro') +
   ggtitle('Nivel Sonoro por Estación del Año') +
-  facet_grid(~Anyo, scales = "fixed")
+  facet_grid(~Anyo, scales = "fixed") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
 Como podemos ver, en líneas generales todas la estaciones suelen tener una media de ruido parecida estando el verano un escalón por encima. Algo también a destacar es la disparidad que encontramos en el año 2021 donde el ruido captado en verano es mayor que en el resto de estaciones esto es debido a que en 2021 las fallas se celebraron a principios de septiembre.
-Cuando representamos por años, podemos ver además cómo el verano del 2021 y el invierno del 2022 fueron tuvieron niveles muy altos de ruido.
+Cuando representamos por años, podemos ver además cómo el verano del 2021 y el invierno del 2022 fueron tuvieron niveles muy altos de ruido.\
 
+
+# Conclusiones 
+Tras el análisis de datos realizado y obteniendo resultados estadísticos representados visualmente, como respuesta a distintas preguntas que hemos podido ir teniendo con respecto a la información de la que disponíamos, podemos concluir:
+
+Sobre los tipos de ruidos medidos en el barrio de ruzafa, encontramos como podría ser lógico pensar, que durante la noche se reduce en el barrio, aunque sigue unas constantes bastante estabilizadas durante un mismo día e incluso meses y años.
+
+En cuanto a los meses, Marzo y Septiembre obtienen un pico muy alto en los años de 2020 y 2021. Sospechamos que lo de Septiembre fue algo ocasional dado que ese año se celebraron las fallas en esas fechas, por lo que Marzo sería un mes con niveles sonoros altísimos y muy perjudiciales.
+
+En relación a los años, vemos como el COVID ha afectado sustancialmente al nivel sonoro del barrio de Ruzafa, teniendo unos niveles bajísimos durante el periodo de cuarentena, así como incrementandose progresivamente coincidiendo con la desescalada hasta llegar al punto actual, casi a la máxima normalidad, y por tanto, a niveles exponencialmente altos.
+Además observamos cómo los días festivos no afectan directamente al nivel de ruido.
+
+Finalmente, en cuanto a las estaciones del año, obtenemos que el Verano es la estación en la que más niveles sonoros se alcanzan, quizá porque es un periodo de mayor ocio, y conociendo que el barrio de Ruzafa es un lugar clave en el que pasar el tiempo con amigos y familia. 
+
+Estos resultados no nos sorprenden, aunque precisan nuestras ideas sobre lo que ocurre en el barrio de ruzafa en cuanto a la contaminación acústica. Como era esperable, Valencia cuenta con niveles de dB muy altos y es un tema que se está tratando en la ciudad.
 
 
 
