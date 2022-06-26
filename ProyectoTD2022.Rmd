@@ -93,7 +93,7 @@ El siguiente bloque, al no especificar opciones del *chunk* usa la configuració
 
 # Especificamos las librerías necesarias en esta lista
 
-packages = c("tidyverse","knitr", 'dplyr', 'tidyr', 'VIM', 'patchwork')
+packages = c("tidyverse","knitr", 'dplyr', 'tidyr', 'VIM', 'patchwork', 'GGally', 'PerformanceAnalytics', 'corrplot', 'ggridges')
 
 #use this function to check if each package is on the local machine
 #if a package is installed, it will be loaded
@@ -297,7 +297,7 @@ df$Ruido %>% unique()
 
 # Las columnas _id, fiwareServicePath, recvTime, entityId y entityType no aportan 
 # información.
-df_tidy <- df %>% select(-1, -fiwareServicePath, -entityType, -recvTime, -entityId)
+df_tidy <- df %>% select(-1, -3, -4, -5, -6)
 
 # Guardamos cada variable con el tipo de dato que le corresponde
 df_tidy <- df_tidy %>% mutate(Place = as.factor(Place), 
@@ -346,7 +346,8 @@ Realizamos un Análisis Univariante, encontrando los estadísticos básicos y un
 
 ```{r, echo = TRUE, message = FALSE, warning = FALSE, tidy = FALSE}
 # Estadísticos que representaremos
-estadisticosbasicos = list("/min" = min, "/max" = max, "/mean" = mean, "/median" = median, "/var" = var, "/sd" = sd, "/IQR" = IQR)
+estadisticosbasicos = list("/min" = min, "/max" = max, "/mean" = mean, 
+                           "/median" = median, "/var" = var, "/sd" = sd, "/IQR" = IQR)
 
 #Mostramos los estadísticos de la variable "Nivel_Sonoro"
 tabla <- summarise(df_tidy, across("Nivel_Sonoro", estadisticosbasicos, na.rm=TRUE)) %>% 
@@ -377,6 +378,260 @@ ggplot(data=df_tidy, aes(x=Nivel_Sonoro)) +
 
 Se observa que se forma una Campana de Gauss en la que los valores más repetidos son los encontrados en el centro del histograma, encontrando en los extremos inferior y superior los conocidos como valores más atípicos, menos repetidos. Además, comprobamos que los valores obtenidos en los estadísticos básicos se corresponden con los representados en el histogrma; donde el valor mínimo y máximo parecen estar entre los 40dB, así como el máximo llegando a los 100dB. Exactamente los estadísticos nos dicen que estos son 40,1dB y 97,4dB, respectivamente. En cuanto a la media y la mediana se puede apreciar en la representación que podría ser un valor cercano a 60 y precisamente los estadísticos de media y mediana obtienen un valor de 60,43dB y 60,6dB respectivamente.
 
+
+# Análisis Bivariante
+
+Realizaremos un Análisis Bivariante donde buscaremos las posibles relaciones entre distintas variables.
+Para ello debemos conocer el significado de los datos de los que disponemos en referencia a los tipos de mediciones de las que disponemos.
+
+-**LAeq**: Nivel sonoro continuo equivalente. En este caso el período establecido para este sensor es de 1 minuto.\
+-**LAeq_d**: Es un indicador de ruido asociado al día.\
+-**LAeq_e**: Es un indicador del nivel sonoro durante la tarde.\
+-**LAeq_n**: Es un indicador del nivel sonoro durante la noche.\
+-**LAeq_den**: índice de ruido día-tarde-noche, es utilizado para determinar la molestia vinculada a la exposición al ruido.\
+
+```{r, echo = TRUE, message = FALSE, warning = FALSE, tidy = FALSE}
+# Diagrama de dispersión
+# Debemos crear un df auxiliar en el que convertir los posibles valores de 'Tipo_Ruido' 
+# en columnas distinas con el objetivo de estudiarlas en cuanto a sus relaciones
+aux <- spread(df_tidy, Tipo_Ruido, Nivel_Sonoro)
+aux <- aux %>% select(-"Estacion", -"Fecha_Medidas")
+
+GGally::ggpairs(aux)
+```
+Se observa que la correlación entre los pares de variables es muy alta en todos los casos; lo que significa que a medida que aumenta una, aumenta la otra. Tiene sentido ya que si el nivel sonoro durante la mañana es alto, lo más probable es que también lo sea durante la tarde y noche.
+
+
+Creamos un gráfico de correlación alternativo por el método de pearson en R con histogramas, funciones de densidad, líneas de regresión suavizadas y coeficientes de correlación con los niveles de significación (si no hay estrellas, la variable no es estadísticamente significativa, mientras que una, dos y tres estrellas significan que la correspondiente variable es estadísticamente significativa para los niveles 10%, 5% y 1%, respectivamente)
+
+```{r, echo = TRUE, message = FALSE, warning = FALSE, tidy = FALSE}
+PerformanceAnalytics::chart.Correlation(aux, histogram = TRUE, method = "pearson")
+```
+```{r, echo = TRUE, message = FALSE, warning = FALSE, tidy = FALSE}
+GGally::ggcorr(aux)
+
+par(mfrow = c(2, 3))
+# Círculos
+corrplot(cor(aux), method = "circle",
+        tl.pos = "n", mar = c(2, 1, 3, 1)) 
+# Cuadrados
+corrplot(cor(aux), method = "square",
+        tl.pos = "n", mar = c(2, 1, 3, 1)) 
+# Elipses
+corrplot(cor(aux), method = "ellipse",
+         tl.pos = "n", mar = c(2, 1, 3, 1)) 
+# Correlaciones
+corrplot(cor(aux), method = "number",
+         tl.pos = "n", mar = c(2, 1, 3, 1)) 
+# Gráficos de sectores
+corrplot(cor(aux), method = "pie",
+         tl.pos = "n", mar = c(2, 1, 3, 1)) 
+# Colores
+corrplot(cor(aux), method = "color",
+         tl.pos = "n", mar = c(2, 1, 3, 1)) 
+```
+
+En las múltiples gráficas representadas obtenemos los mismos resultados, aquellos descritos anteriormente: La relación lineal entre las variables es muy alta.
+
+Observamos como se distribuyen los datos de cada Tipo de Ruido medido en las diferentes estaciones de medición
+```{r, echo = TRUE, message = FALSE, warning = FALSE, tidy = FALSE}
+aux1 <- df_tidy %>% separate(Fecha_Medidas, c('Anyo','Mes', 'Dia'))
+
+which(aux1$Tipo_Ruido == 'Continuo')
+ggplot(aux1, aes(x = Nivel_Sonoro, y = Tipo_Ruido, fill = stat(x))) +
+  geom_density_ridges_gradient() +
+  scale_fill_viridis_c(name = "Nivel_Sonoro", option = "C") +
+  coord_cartesian(clip = "off") + 
+  labs(title="Histograma del Nivel Sonoro según el Tipo de Ruido", x="Nivel Sonoro", y="Tipo Ruido")
+```
+Se observa que los niveles sonoros durante la noche disminuyen. Esto es causado porque hay menos actividad en el barrio y en general, en la ciudad. Los servicios son menores y hay menos afluencia de gente también.
+
+
+
+Describimos y contextualizamos en función de los datos cuál es su comportamiento durante los meses y los años de los que disponemos información.\
+
+
+EN FUNCIÓN DE LOS MESES
+```{r, echo = TRUE, message = FALSE, warning = FALSE, tidy = FALSE}
+# Creamos un df auxiliar en el que separamos la columna de 'Fecha_Medidas' en 
+# 3 correspondientes con el año, el mes y el dia que supone cada uno de los 
+# registros como fecha con el objetivo de obtener fácilmente representaciones 
+# en función de los meses
+
+ggplot(aux1, aes(x=Mes, y=Nivel_Sonoro, fill=Mes)) + 
+  geom_boxplot(fill = "#4271AE", colour = "#1F3552", # Colores
+                    alpha = 0.9, outlier.colour = "red")+
+  stat_summary(fun=mean, geom='point', shape=20, size=3) +
+  theme(legend.position='none')+
+  scale_y_continuous(name = "Nivel Sonoro") +  
+  scale_x_discrete(name = "Meses") +        
+  ggtitle("Boxplot por Meses del Nivel Sonoro")
+
+```
+Observamos que la media de cada uno de ellos se encuentra entorno a 60dB, así como la mediana, correspondiendo con los estadísticos producidos anteriormente cuya media global era el valor 60,43dB y 60,6dB, respectivamente. Además, suponemos que el valor máximo se encuentra en el mes de Marzo o Septiembre, donde se obtienen mayor número de valores atípicos y extremos. Cabe destacar que, por tanto, el valor media en estos meses también es más elevado, tal y como se observa en la gráfica. Así como el mínimo se podría encontrar en el mes de Abril, aunque en este caso no es algo tan evidente.
+
+Inspeccionando más detenidamente lo dicho anteriormente con respecto a los meses de Marzo, Abril y Septiembre, los representamos añadiendo la distribución de sus datos y observando de mejor manera cuáles son los que presentan mayor y menor contaminación acústica. Lo hacemos de manera general y después diferenciamos por años para ver cronológicamente cómo se distribuyen nuestros datos.
+
+```{r, echo = TRUE, message = FALSE, warning = FALSE, tidy = FALSE}
+ggplot(aux1, aes(x = Mes, y = Nivel_Sonoro)) + 
+  geom_jitter(aes(color = Mes), size = 1, alpha = 0.7) +
+  geom_boxplot(aes(color = Mes), alpha = 0.7, outlier.shape = NA) + 
+  scale_y_continuous(name = "Nivel Sonoro") +  
+  scale_x_discrete(name = "Meses") +       
+  ggtitle("Nivel Sonoro en función de los Meses") +
+  theme_minimal()
+```
+```{r, echo = TRUE, message = FALSE, warning = FALSE, tidy = FALSE}
+ggplot(aux1, aes(x = Mes, y = Nivel_Sonoro, colour = Nivel_Sonoro)) + 
+  geom_jitter(size = 1, alpha = 0.7) +
+  geom_point()+
+  scale_colour_gradient2(low="blue",
+                         high="red",
+                         mid="orange",
+                         midpoint=65) +
+  scale_y_continuous(name = "Nivel Sonoro") +  
+  scale_x_discrete(name = "Meses") +       
+  ggtitle("Nivel Sonoro en función de los Meses distribuido por Años") +
+  theme_minimal() +
+  facet_grid(~Anyo, scales = "fixed")
+```
+
+```{r, echo = TRUE, message = FALSE, warning = FALSE, tidy = FALSE}
+ggplot() + 
+  geom_col(data = aux1, aes(x = Anyo, y = Nivel_Sonoro, fill = Tipo_Ruido), position = "dodge") +
+    labs(title="Nivel Sonoro por Tipos de Ruido Medidos por Años", x="Años", y="Nivel Sonoro") +
+    theme_minimal()
+
+```
+
+Representamos el nivel de ruido en función de los meses y de los tipos de mediciones de los que tenemos datos
+
+```{r, echo = TRUE, message = FALSE, warning = FALSE, tidy = FALSE}
+aux1 %>% ggplot(aes(x = Mes, y = Nivel_Sonoro, fill = Mes)) + 
+  geom_boxplot() + 
+  labs(title = paste0("Densidad del ruido ",sep="")) + 
+  facet_wrap(~Tipo_Ruido, scales = "free") +
+  theme_minimal()
+
+```
+\
+
+EN FUNCIÓN DE LOS AÑOS
+```{r, echo = TRUE, message = FALSE, warning = FALSE, tidy = FALSE}
+# Con el df auxiliar en el que hemos separado la columna de 'Fecha_Medidas' en 3 correspondientes 
+# con el año, el mes y el dia que supone cada uno de los registros, obtenemos fácilmente 
+# representaciones en función de los años
+
+ggplot(aux1, aes(x=Anyo, y=Nivel_Sonoro, fill=Anyo)) + 
+  geom_boxplot(fill = "#4271AE", colour = "#1F3552", # Colores
+                    alpha = 0.9, outlier.colour = "red")+
+  stat_summary(fun=mean, geom='point', shape=20, size=3) +
+  theme(legend.position='none')+
+  scale_y_continuous(name = "Nivel Sonoro") +  
+  scale_x_discrete(name = "Años") +       
+  ggtitle("Boxplot por Años del Nivel Sonoro")
+
+```
+
+Se aprecia como la cuarentena afectó al nivel sonoro del barrio de ruzafa, así como del mundo entero. Puesto que estar en nuestras casa y evitar actos multitudinarios y aux1ividades, supuso una reducción del mismo en el año 2020. En cuanto al 2021 y 2022 en el que poco a poco se ha ido retomando nuestra vida anterior, el nivel sonoro produce un crecimiento en el barrio, estando el valor medio del año 2022 por encima del 2021. Esto se explica porque la desescalada fue progresiva, hasta encontrarnos en la situación actual de 2022 en la que prácticamente se ha retomado la actividad.
+
+Representamos la distribución de los datos del nivel sonoro en cada año
+
+```{r, echo = TRUE, message = FALSE, warning = FALSE, tidy = FALSE}
+# Box plot por grupo con observaciones
+ggplot(aux1, aes(x = Anyo, y = Nivel_Sonoro)) + 
+  geom_jitter(aes(color = Anyo), size = 1, alpha = 0.7) +
+  geom_boxplot(aes(color = Anyo), alpha = 0.7, outlier.shape = NA) + 
+  scale_y_continuous(name = "Nivel Sonoro") +  
+  scale_x_discrete(name = "Años") +       
+  ggtitle("Nivel Sonoro en función de los Años") +
+  theme_minimal()
+```
+
+```{r, echo = TRUE, message = FALSE, warning = FALSE, tidy = FALSE}
+aux1 %>% ggplot(aes(x = Anyo, y = Nivel_Sonoro, fill = Anyo)) + 
+  geom_boxplot() + 
+  labs(title = paste0("Densidad del ruido ",sep="")) + 
+  facet_wrap(~Tipo_Ruido, scales = "free") 
+```
+
+
+Podemos diferenciar algunos dias como Festivos en los que cabe la posibilidad de que el nivel sonoro varíe con respecto a aquellos No Festivos. Podemos añadir una columna en la que identifiquemos cada uno de los registros según su Fecha como 'Festivo' o 'No Festivo', para así representar un gráfico en el que por cada año, obtengamos los Niveles de Sonido, y así obtengamos una respuesta en relación a la pregunta planteada.
+
+```{r, echo = TRUE, message = FALSE, warning = FALSE, tidy = FALSE}
+aux1 <- aux1 %>% mutate(Anyo = as.integer(Anyo), Mes = as.integer(Mes), Dia = as.integer(Dia))
+
+for (i in 1:dim(aux1[2])){
+  if (((aux1[i, 'Mes']) == 1) & ((aux1[i, 'Dia']) == 1 | (aux1[i, 'Dia']) == 6 |(aux1[i,'Dia']) == 22)){aux1[i,"Festivo"]<-"Fest"
+  }
+  else {if (((aux1[i, 'Mes']) == 3) & (aux1[i, 'Dia']) == 19) 
+  {aux1[i,"Festivo"]<-"Fest"}
+  else{if (((aux1[i, 'Mes']) == 4) & ((aux1[i, 'Dia']) == 15 | (aux1[i, 'Dia']) == 18 | (aux1[i, 'Dia']) == 25)){aux1[i,"Festivo"]<-"Fest"
+  }
+  else{if (((aux1[i, 'Mes']) == 5) & (aux1[i, 'Dia']) == 2)  {aux1[i,"Festivo"]<-"Fest"
+  }
+  else{if (((aux1[i, 'Mes']) == 6) & (aux1[i, 'Dia']) == 24) {aux1[i,"Festivo"]<-"Fest" 
+  }
+  else{if (((aux1[i, 'Mes']) == 8) & (aux1[i, 'Dia']) == 15) {aux1[i,"Festivo"]<-"Fest" 
+  }
+  else{ if (((aux1[i, 'Mes']) == 10) & (aux1[i, 'Dia']) == 12) {aux1[i,"Festivo"]<-"Fest" 
+  }
+  else{ if (((aux1[i, 'Mes']) == 11) & (aux1[i, 'Dia']) == 1) {aux1[i,"Festivo"]<-"Fest" 
+  }
+  else{if (((aux1[i, 'Mes']) == 12) & ((aux1[i, 'Dia']) == 6 | (aux1[i, 'Dia']) ==                 8)){aux1[i,"Festivo"]<-"Fest" }
+  else{
+    aux1[i,"Festivo"]<-"No fest"
+  }}}}}}}}}
+}
+
+ggplot() +
+  geom_col(data = aux1, aes(x = Anyo, y = Nivel_Sonoro, fill = Festivo), position = "dodge") +
+    labs(title="Nivel Sonoro en días festivos", x="Año", y="Nivel Sonoro") +
+  scale_fill_manual(values=c("pink","#56b86f"))
+
+```
+
+Se aprecia que no hay una grandísima diferencia entre los niveles de ruido en festivo o no, lo que tiene su sentido ya que en estos dias se compensa la falta de actividad laborable con la actividad que la gente puede hacer fuera de sus casas relacionadas con el ocio. No obstante, se aprecia que en No Festivos se incrementa el nivel sonoro.\
+
+
+EN FUNCIÓN DE LAS ESTACIONES DEL AÑO
+```{r, echo = TRUE, message = FALSE, warning = FALSE, tidy = FALSE}
+for (i in 1:dim(aux1[1])){
+  if (((aux1[i, 'Mes']) >= 7 & (aux1[i, 'Mes']) <= 8) | ((aux1[i, 'Mes']) == 6 
+      & (aux1[i, 'Dia']) >= 21) | ((aux1[i, 'Mes']) == 9 & (aux1[i, 'Dia']) < 23)){
+    aux1[i, 'Estacion_Anyo'] <- 'Verano'
+  } else {
+    if (((aux1[i, 'Mes']) >= 10 & (aux1[i, 'Mes']) <= 11) | ((aux1[i, 'Mes']) == 9 
+    & (aux1[i, 'Dia']) >= 23) | ((aux1[i, 'Mes']) == 12 & (aux1[i, 'Dia']) < 21)){
+      aux1[i, 'Estacion_Anyo'] <- 'Otoño'
+    } else {
+      if (((aux1[i, 'Mes']) >= 1 & (aux1[i, 'Mes']) <= 2) | ((aux1[i, 'Mes']) == 12 
+    & (aux1[i, 'Dia']) >= 21) | ((aux1[i, 'Mes']) == 3 & (aux1[i, 'Dia']) < 20)){
+        aux1[i, 'Estacion_Anyo'] <-  'Invierno'
+      } else {
+        aux1[i, 'Estacion_Anyo'] <-  'Primavera'
+      }}}}
+
+ggplot(data = aux1, aes(x = Estacion_Anyo, y = Nivel_Sonoro)) + 
+  geom_jitter(size = 1, color = 'gray', alpha = 0.5) +
+  geom_violin(aes(fill = Estacion_Anyo), color = 'black', alpha = 0.8, 
+              draw_quantiles = c(0.25, 0.5, 0.75)) + 
+  xlab('Estación del Año') + 
+  ylab('Nivel Sonoro') +
+  ggtitle('Nivel Sonoro por Estación del Año')
+
+ggplot(data = aux1, aes(x = Estacion_Anyo, y = Nivel_Sonoro)) + 
+  geom_jitter(size = 1, color = 'gray', alpha = 0.5) +
+  geom_violin(aes(fill = Estacion_Anyo), color = 'black', alpha = 0.8) +
+  geom_boxplot(color = 'black', alpha = 0.7) + 
+  xlab('Estación del Año') + 
+  ylab('Nivel Sonoro') +
+  ggtitle('Nivel Sonoro por Estación del Año') +
+  facet_grid(~Anyo, scales = "fixed")
+```
+
+Como podemos ver, en líneas generales todas la estaciones suelen tener una media de ruido parecida estando el verano un escalón por encima. Algo también a destacar es la disparidad que encontramos en el año 2021 donde el ruido captado en verano es mayor que en el resto de estaciones esto es debido a que en 2021 las fallas se celebraron a principios de septiembre.
+Cuando representamos por años, podemos ver además cómo el verano del 2021 y el invierno del 2022 fueron tuvieron niveles muy altos de ruido.
 
 
 
